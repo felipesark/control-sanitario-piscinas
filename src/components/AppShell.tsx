@@ -4,6 +4,17 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { APP_NAV_GROUPS, MOBILE_NAV } from "@/lib/nav";
 
+function BrandLogo({ className = "h-10 w-10" }: { className?: string }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/logo-arespool.png"
+      alt="Control Sanitario"
+      className={`${className} shrink-0 object-contain`}
+    />
+  );
+}
+
 function NavIcon({ href, className = "h-5 w-5" }: { href: string; className?: string }) {
   const common = {
     viewBox: "0 0 24 24",
@@ -159,19 +170,20 @@ export function AppShell({
       {/* Desktop sidebar */}
       <aside className="app-sidebar relative hidden lg:flex">
         <div className="flex h-full w-full flex-col border-r border-[var(--border)] bg-[var(--surface)]">
-          <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-4">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--deep)] text-sm font-bold text-white">
-              CS
-            </div>
+          <Link
+            href="/"
+            className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-4"
+          >
+            <BrandLogo className="h-10 w-10" />
             {!collapsed ? (
               <div className="min-w-0">
                 <p className="truncate font-display text-base font-bold text-[var(--deep)]">
                   Control Sanitario
                 </p>
-                <p className="truncate text-xs text-[var(--muted)]">Antioquia</p>
+                <p className="truncate text-xs text-[var(--muted)]">Piscinas sanas y seguras</p>
               </div>
             ) : null}
-          </div>
+          </Link>
 
           <SidebarNav active={active} collapsed={collapsed} />
 
@@ -218,10 +230,17 @@ export function AppShell({
           />
           <aside className="absolute inset-y-0 left-0 flex w-[min(18rem,86vw)] flex-col bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-4">
-              <div>
-                <p className="font-display text-base font-bold text-[var(--deep)]">Control Sanitario</p>
-                <p className="text-xs text-[var(--muted)]">Antioquia</p>
-              </div>
+              <Link
+                href="/"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3"
+              >
+                <BrandLogo className="h-9 w-9" />
+                <div>
+                  <p className="font-display text-base font-bold text-[var(--deep)]">Control Sanitario</p>
+                  <p className="text-xs text-[var(--muted)]">Piscinas sanas y seguras</p>
+                </div>
+              </Link>
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
@@ -326,8 +345,9 @@ export function AuthShell({
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(26,143,143,0.16),_transparent_55%),linear-gradient(180deg,#0b3d5c_0%,#0b3d5c_26%,transparent_26%)]" />
         <div className="relative mx-auto flex min-h-dvh max-w-lg flex-col justify-center px-4 py-10 sm:max-w-xl sm:px-6">
           <div className="mb-6 text-center text-white">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--foam)]/80">
-              Control Sanitario · Antioquia
+            <BrandLogo className="mx-auto h-28 w-28 drop-shadow-lg" />
+            <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--foam)]/80">
+              Control Sanitario · Piscinas sanas y seguras
             </p>
             <h1 className="mt-2 font-display text-3xl font-bold">{title}</h1>
             {subtitle ? <p className="mt-2 text-sm text-[var(--foam)]/85">{subtitle}</p> : null}

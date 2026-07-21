@@ -14,10 +14,14 @@ const PUBLIC_PREFIXES = [
   "/_next/",
   "/icon",
   "/manifest",
+  "/logo-",
 ];
+
+const STATIC_EXT = /\.(?:png|jpe?g|gif|webp|svg|ico|css|js|map|txt|woff2?)$/i;
 
 function isPublic(pathname: string): boolean {
   if (PUBLIC_PATHS.includes(pathname)) return true;
+  if (STATIC_EXT.test(pathname)) return true;
   return PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
 }
 
@@ -93,6 +97,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|icon.svg|manifest.json).*)",
+    "/((?!_next/static|_next/image|favicon.ico|apple-touch-icon\\.png|icon-192\\.png|icon-512\\.png|manifest.json|logo-arespool\\.png|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)",
   ],
 };
