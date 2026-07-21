@@ -1,8 +1,7 @@
 "use client";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { AppHeader } from "@/components/AppHeader";
-import { BottomNav } from "@/components/BottomNav";
+import { AppShell } from "@/components/AppShell";
 import { RegistroForm } from "@/components/RegistroForm";
 import { useAppData } from "@/hooks/useAppData";
 import { formatFechaHoy, formatFechaLegible } from "@/lib/storage";
@@ -16,18 +15,35 @@ function RegistroContent() {
   const salvavidas = data?.configuracion.salvavidas.map((s) => ({ id: s.id, nombre: s.nombre })) ?? [];
 
   return (
-    <main className="page-shell mx-auto max-w-lg">
-      <AppHeader title="Registro diario" subtitle={`Fecha: ${formatFechaLegible(fecha)}`} />
-      <div className="space-y-4 p-4">
-        <label className="block rounded-2xl border border-[var(--border)] bg-white p-4">
+    <AppShell
+      active="/registro"
+      title="Registro diario"
+      subtitle={`Fecha: ${formatFechaLegible(fecha)}`}
+      width="narrow"
+    >
+      <div className="space-y-4">
+        <label className="block rounded-2xl border border-[var(--border)] bg-white p-4 sm:p-5">
           <span className="mb-2 block text-sm font-medium">Seleccionar fecha</span>
-          <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full rounded-xl border border-[var(--border)] px-3 py-2.5" />
+          <input
+            type="date"
+            value={fecha}
+            onChange={(e) => setFecha(e.target.value)}
+            className="w-full rounded-xl border border-[var(--border)] px-3 py-2.5"
+          />
         </label>
-        {operadores.length === 0 ? <p className="rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-800">Agregue operadores en Configuracion para asignarlos al registro.</p> : null}
-        <RegistroForm fecha={fecha} operadores={operadores} salvavidas={salvavidas} onSaved={refresh} />
+        {operadores.length === 0 ? (
+          <p className="rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            Agregue operadores en Configuracion para asignarlos al registro.
+          </p>
+        ) : null}
+        <RegistroForm
+          fecha={fecha}
+          operadores={operadores}
+          salvavidas={salvavidas}
+          onSaved={refresh}
+        />
       </div>
-      <BottomNav active="/registro" />
-    </main>
+    </AppShell>
   );
 }
 

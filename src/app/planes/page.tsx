@@ -3,8 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { AppHeader } from "@/components/AppHeader";
-import { BottomNav } from "@/components/BottomNav";
+import { AppShell } from "@/components/AppShell";
 import { PLANS, formatCop, type PlanId } from "@/lib/plans";
 import type { SubscriptionInfo } from "@/lib/subscription";
 import { getAppData } from "@/lib/storage";
@@ -47,7 +46,7 @@ function PlanesContent() {
   };
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4 lg:space-y-6">
       {expired ? (
         <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
           Su periodo de prueba o suscripcion ha vencido. Elija un plan para continuar.
@@ -62,9 +61,10 @@ function PlanesContent() {
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
+      <div className="grid gap-4 md:grid-cols-2 lg:gap-6">
       {PLANS.map((plan) => (
-        <div key={plan.id} className="rounded-2xl border-2 border-[var(--border)] bg-white p-5">
-          <div className="flex items-start justify-between">
+        <div key={plan.id} className="rounded-2xl border-2 border-[var(--border)] bg-white p-5 sm:p-6">
+          <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="font-display text-xl font-bold text-[var(--deep)]">{plan.nombre}</h2>
               <p className="mt-1 text-sm text-[var(--muted)]">{plan.descripcion}</p>
@@ -106,6 +106,7 @@ function PlanesContent() {
           </div>
         </div>
       ))}
+      </div>
 
       <div className="rounded-xl bg-white p-4 text-sm text-[var(--muted)]">
         <p className="font-semibold text-[var(--deep)]">Metodos de pago</p>
@@ -126,12 +127,15 @@ function PlanesContent() {
 
 export default function PlanesPage() {
   return (
-    <main className="page-shell mx-auto max-w-lg">
-      <AppHeader title="Planes y precios" subtitle="Elija como desea pagar su suscripcion" />
-      <Suspense fallback={<div className="p-4">Cargando...</div>}>
+    <AppShell
+      active="/planes"
+      title="Planes y precios"
+      subtitle="Elija como desea pagar su suscripcion"
+      width="wide"
+    >
+      <Suspense fallback={<div className="py-4">Cargando...</div>}>
         <PlanesContent />
       </Suspense>
-      <BottomNav active="/planes" />
-    </main>
+    </AppShell>
   );
 }

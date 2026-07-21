@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { AppHeader } from "@/components/AppHeader";
-import { BottomNav } from "@/components/BottomNav";
+import { AppShell } from "@/components/AppShell";
 import { Field, TextInput } from "@/components/ui";
 import { useAppData } from "@/hooks/useAppData";
 import { formatFechaHoy, formatFechaLegible } from "@/lib/storage";
@@ -65,12 +64,15 @@ export default function HistorialPage() {
   };
 
   return (
-    <main className="page-shell mx-auto max-w-lg">
-      <AppHeader title="Historial" subtitle="Registros guardados por fecha" />
-
-      <div className="space-y-3 p-4">
+    <AppShell
+      active="/historial"
+      title="Historial"
+      subtitle="Registros guardados por fecha"
+      width="wide"
+    >
+      <div className="space-y-4 lg:space-y-6">
         {registros.length > 0 ? (
-          <section className="rounded-2xl border border-[var(--border)] bg-white p-4">
+          <section className="rounded-2xl border border-[var(--border)] bg-white p-4 sm:p-5 lg:max-w-xl">
             <h2 className="font-display text-lg font-semibold text-[var(--deep)]">Exportar</h2>
             <p className="mt-1 text-sm text-[var(--muted)]">
               Elige un rango de fechas y descarga en PDF o Excel.
@@ -132,16 +134,17 @@ export default function HistorialPage() {
             </Link>
           </div>
         ) : (
-          registros.map((r) => {
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {registros.map((r) => {
             const operador = data?.configuracion.operadores.find((o) => o.id === r.operadorId);
             const laboresCompletadas = Object.values(r.labores).filter(Boolean).length;
             const totalLabores = Object.keys(r.labores).length;
             const alertas = evaluarRegistro(r).length;
 
             return (
-              <div key={r.id} className="rounded-2xl border border-[var(--border)] bg-white p-4">
+              <div key={r.id} className="rounded-2xl border border-[var(--border)] bg-white p-4 sm:p-5">
                 <Link href={`/registro?fecha=${r.fecha}`} className="block">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <p className="font-display text-lg font-semibold text-[var(--deep)]">
                       {formatFechaLegible(r.fecha)}
                     </p>
@@ -167,11 +170,10 @@ export default function HistorialPage() {
                 </button>
               </div>
             );
-          })
+          })}
+          </div>
         )}
       </div>
-
-      <BottomNav active="/historial" />
-    </main>
+    </AppShell>
   );
 }

@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AppHeader } from "@/components/AppHeader";
-import { BottomNav } from "@/components/BottomNav";
+import { AppShell } from "@/components/AppShell";
 import { useAppData } from "@/hooks/useAppData";
 import { formatFechaHoy, formatFechaLegible } from "@/lib/storage";
 import { evaluarRegistro } from "@/lib/rangos-legales";
@@ -22,17 +21,17 @@ export default function HomePage() {
   const syncStatus = ready ? getSyncStatus() : { configured: false, lastSync: null };
 
   return (
-    <main className="page-shell mx-auto max-w-lg">
-      <AppHeader
-        title={config?.nombreEstanque || "Libro de Control Sanitario"}
-        subtitle={config?.razonSocial || "Configure su instalación para comenzar"}
-      />
-
-      <div className="space-y-4 p-4">
+    <AppShell
+      active="/"
+      title={config?.nombreEstanque || "Libro de Control Sanitario"}
+      subtitle={config?.razonSocial || "Configure su instalación para comenzar"}
+      width="wide"
+    >
+      <div className="space-y-4 lg:space-y-6">
         {isSupabaseConfigured() ? <SubscriptionBanner /> : null}
 
         {!configCompleta ? (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:p-5">
             <p className="font-semibold text-amber-900">Configuración pendiente</p>
             <p className="mt-1 text-sm text-amber-800">
               Complete los datos de la instalación antes de registrar controles diarios.
@@ -46,65 +45,56 @@ export default function HomePage() {
           </div>
         ) : null}
 
-        <section className="rounded-2xl bg-[var(--deep)] p-5 text-white">
-          <p className="text-sm text-[var(--foam)]/80">Registro de hoy</p>
-          <p className="font-display mt-1 text-3xl font-bold">{formatFechaLegible(hoy)}</p>
-          <p className="mt-2 text-sm">
-            {registroHoy
-              ? `Última actualización: ${new Date(registroHoy.actualizadoEn).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}`
-              : "Aún no hay registro para hoy"}
-          </p>
-          <Link
-            href="/registro"
-            className="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-[var(--accent)] px-4 py-3 font-semibold text-white"
-          >
-            {registroHoy ? "Continuar registro" : "Iniciar registro del dia"}
-          </Link>
-          {registroHoy && data ? (
-            <button
-              type="button"
-              onClick={() => exportarRegistroPDF(data, registroHoy)}
-              className="mt-2 inline-flex w-full items-center justify-center rounded-2xl border border-white/30 px-4 py-2.5 text-sm font-medium text-white"
-            >
-              Exportar PDF de hoy
-            </button>
-          ) : null}
-        </section>
-
-        {registroHoy ? (
-          <section className="rounded-2xl border border-[var(--border)] bg-white p-4">
-            <h2 className="font-display text-lg font-semibold text-[var(--deep)]">Estado sanitario de hoy</h2>
-            <div className="mt-3">
-              <AlertasPanel alertas={alertasHoy} compact={alertasHoy.length === 0} />
+        <div className="grid gap-4 lg:grid-cols-5 lg:gap-6">
+          <section className="rounded-2xl bg-[var(--deep)] p-5 text-white sm:p-6 lg:col-span-3">
+            <p className="text-sm text-[var(--foam)]/80">Registro de hoy</p>
+            <p className="font-display mt-1 text-3xl font-bold sm:text-4xl">{formatFechaLegible(hoy)}</p>
+            <p className="mt-2 text-sm">
+              {registroHoy
+                ? `Última actualización: ${new Date(registroHoy.actualizadoEn).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}`
+                : "Aún no hay registro para hoy"}
+            </p>
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+              <Link
+                href="/registro"
+                className="inline-flex flex-1 items-center justify-center rounded-2xl bg-[var(--accent)] px-4 py-3 font-semibold text-white"
+              >
+                {registroHoy ? "Continuar registro" : "Iniciar registro del dia"}
+              </Link>
+              {registroHoy && data ? (
+                <button
+                  type="button"
+                  onClick={() => exportarRegistroPDF(data, registroHoy)}
+                  className="inline-flex flex-1 items-center justify-center rounded-2xl border border-white/30 px-4 py-3 text-sm font-medium text-white"
+                >
+                  Exportar PDF de hoy
+                </button>
+              ) : null}
             </div>
           </section>
-        ) : null}
 
-        <section className="rounded-2xl border border-[var(--border)] bg-white p-4">
-          <h2 className="font-display text-lg font-semibold text-[var(--deep)]">Sincronizacion</h2>
-          <p className="mt-2 text-sm text-[var(--muted)]">
-            {syncStatus.configured
-              ? syncStatus.lastSync
-                ? `Ultima sincronizacion: ${new Date(syncStatus.lastSync).toLocaleString("es-CO")}`
-                : "Supabase listo. Sincronice desde Configuracion."
-              : "Configure Supabase en .env.local para respaldo en la nube."}
-          </p>
-          <Link href="/configuracion" className="mt-2 inline-block text-sm font-semibold text-[var(--accent)]">
-            Configuracion de instalacion
-          </Link>
-        </section>
+          <section className="rounded-2xl border border-[var(--border)] bg-white p-4 sm:p-5 lg:col-span-2">
+            <h2 className="font-display text-lg font-semibold text-[var(--deep)]">
+              Estado sanitario de hoy
+            </h2>
+            <div className="mt-3">
+              {registroHoy ? (
+                <AlertasPanel alertas={alertasHoy} compact={alertasHoy.length === 0} />
+              ) : (
+                <p className="text-sm text-[var(--muted)]">Sin registro para evaluar aún.</p>
+              )}
+            </div>
+          </section>
+        </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <Link
-            href="/dashboard"
-            className="rounded-2xl bg-[var(--accent)] px-4 py-4 text-center"
-          >
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:gap-4">
+          <Link href="/dashboard" className="rounded-2xl bg-[var(--accent)] px-4 py-4 text-center sm:p-5">
             <p className="text-xs font-semibold uppercase tracking-wide text-white/80">Panel</p>
             <p className="mt-1 font-display text-lg font-bold text-white">Dashboard en vivo</p>
           </Link>
           <Link
             href="/visitas"
-            className="rounded-2xl border border-[var(--border)] bg-white px-4 py-4 text-center"
+            className="rounded-2xl border border-[var(--border)] bg-white px-4 py-4 text-center sm:p-5"
           >
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Visitas</p>
             <p className="mt-1 font-display text-lg font-bold text-[var(--deep)]">
@@ -115,35 +105,39 @@ export default function HomePage() {
           <StatCard label="Operadores" value={ready ? String(config?.operadores.length ?? 0) : "—"} />
         </div>
 
-        <section className="rounded-2xl border border-[var(--border)] bg-white p-4">
-          <h2 className="font-display text-lg font-semibold text-[var(--deep)]">Marco normativo</h2>
-          <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
-            Basado en el Libro Estándar de Registro de Control Sanitario de Estanques de Piscinas
-            (Antioquia). Ley 9/1979, Decreto 3751/1993, Ley 1209/2008, Resoluciones 1618/2010 y 1510/2011.
-          </p>
-        </section>
-      </div>
+        <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
+          <section className="rounded-2xl border border-[var(--border)] bg-white p-4 sm:p-5">
+            <h2 className="font-display text-lg font-semibold text-[var(--deep)]">Sincronizacion</h2>
+            <p className="mt-2 text-sm text-[var(--muted)]">
+              {syncStatus.configured
+                ? syncStatus.lastSync
+                  ? `Ultima sincronizacion: ${new Date(syncStatus.lastSync).toLocaleString("es-CO")}`
+                  : "Supabase listo. Sincronice desde Configuracion."
+                : "Configure Supabase en .env.local para respaldo en la nube."}
+            </p>
+            <Link href="/configuracion" className="mt-2 inline-block text-sm font-semibold text-[var(--accent)]">
+              Configuracion de instalacion
+            </Link>
+          </section>
 
-      <BottomNav active="/" />
-    </main>
+          <section className="rounded-2xl border border-[var(--border)] bg-white p-4 sm:p-5">
+            <h2 className="font-display text-lg font-semibold text-[var(--deep)]">Marco normativo</h2>
+            <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
+              Basado en el Libro Estándar de Registro de Control Sanitario de Estanques de Piscinas
+              (Antioquia). Ley 9/1979, Decreto 3751/1993, Ley 1209/2008, Resoluciones 1618/2010 y 1510/2011.
+            </p>
+          </section>
+        </div>
+      </div>
+    </AppShell>
   );
 }
 
-function StatCard({
-  label,
-  value,
-  small,
-}: {
-  label: string;
-  value: string;
-  small?: boolean;
-}) {
+function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-white p-4">
+    <div className="rounded-2xl border border-[var(--border)] bg-white p-4 sm:p-5">
       <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">{label}</p>
-      <p className={`mt-1 font-display font-bold text-[var(--deep)] ${small ? "text-base" : "text-2xl"}`}>
-        {value}
-      </p>
+      <p className="mt-1 font-display text-2xl font-bold text-[var(--deep)]">{value}</p>
     </div>
   );
 }

@@ -1,15 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --background: #e8f2f7;
+  --background: #eef3f7;
+  --canvas: #eef3f7;
   --foreground: #0f2b3d;
   --surface: #ffffff;
   --deep: #0b3d5c;
   --accent: #1a8f8f;
+  --accent-soft: #d8f1f1;
   --foam: #d4eef5;
   --muted: #5b7283;
-  --border: #c5d9e4;
+  --border: #d5e2ea;
   --alert: #d95f4a;
+  --sidebar-width: 16.5rem;
+  --sidebar-collapsed: 4.75rem;
 }
 
 @theme inline {
@@ -29,7 +33,7 @@ body {
 }
 
 body {
-  background: var(--background);
+  background: var(--canvas);
   color: var(--foreground);
   font-family: var(--font-body), system-ui, sans-serif;
 }
@@ -51,9 +55,53 @@ body {
   padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
 }
 
+@media (min-width: 1024px) {
+  .page-shell {
+    padding-bottom: 2rem;
+  }
+
+  .app-frame {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  }
+
+  .app-frame--collapsed {
+    grid-template-columns: var(--sidebar-collapsed) minmax(0, 1fr);
+  }
+
+  .app-sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    height: 100dvh;
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .app-main {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 1023px) {
+  .app-main {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+  }
+}
+
 input,
 select,
 textarea,
 button {
   font: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

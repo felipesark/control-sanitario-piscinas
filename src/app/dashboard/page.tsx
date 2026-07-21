@@ -17,8 +17,7 @@ import {
   YAxis,
   ReferenceLine,
 } from "recharts";
-import { AppHeader } from "@/components/AppHeader";
-import { BottomNav } from "@/components/BottomNav";
+import { AppShell } from "@/components/AppShell";
 import { useAppData } from "@/hooks/useAppData";
 import { buildDashboardMetrics } from "@/lib/dashboard-metrics";
 
@@ -45,14 +44,14 @@ export default function DashboardPage() {
   );
 
   return (
-    <main className="page-shell mx-auto max-w-lg">
-      <AppHeader
-        title="Dashboard"
-        subtitle="Indicadores sanitarios en vivo"
-      />
-
-      <div className="space-y-4 p-4">
-        <div className="flex items-center justify-between rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
+    <AppShell
+      active="/dashboard"
+      title="Dashboard"
+      subtitle="Indicadores sanitarios en vivo"
+      width="wide"
+    >
+      <div className="space-y-4 lg:space-y-6">
+        <div className="flex items-center justify-between rounded-2xl border border-[var(--border)] bg-white px-4 py-3 sm:px-5">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2.5 w-2.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--accent)] opacity-60" />
@@ -77,7 +76,7 @@ export default function DashboardPage() {
           </section>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6 lg:gap-4">
               <Kpi
                 label="Alertas hoy"
                 value={String(metrics.alertasHoy)}
@@ -100,8 +99,9 @@ export default function DashboardPage() {
               <Kpi label="Registros (14d)" value={String(metrics.registrosUltimos14)} />
             </div>
 
+            <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
             <ChartCard title="pH diario" hint={`Rango legal ${metrics.rangos.phMin}–${metrics.rangos.phMax}`}>
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={240}>
                 <ComposedChart data={metrics.serie} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#c5d9e4" />
                   <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#5b7283" }} />
@@ -127,7 +127,7 @@ export default function DashboardPage() {
             </ChartCard>
 
             <ChartCard title="Cloro libre" hint={`Rango legal ${metrics.rangos.cloroMin}–${metrics.rangos.cloroMax} mg/L`}>
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={240}>
                 <AreaChart data={metrics.serie} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#c5d9e4" />
                   <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#5b7283" }} />
@@ -153,7 +153,7 @@ export default function DashboardPage() {
             </ChartCard>
 
             <ChartCard title="Turbidez y bañistas" hint={`Turbidez máx. ${metrics.rangos.turbidezMax} UNT`}>
-              <ResponsiveContainer width="100%" height={220}>
+              <ResponsiveContainer width="100%" height={260}>
                 <ComposedChart data={metrics.serie} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#c5d9e4" />
                   <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#5b7283" }} />
@@ -183,7 +183,7 @@ export default function DashboardPage() {
             </ChartCard>
 
             <ChartCard title="Alertas por día" hint="Días con parámetros fuera de rango">
-              <ResponsiveContainer width="100%" height={180}>
+              <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={metrics.serie} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#c5d9e4" />
                   <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#5b7283" }} />
@@ -193,8 +193,9 @@ export default function DashboardPage() {
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>
+            </div>
 
-            <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="grid grid-cols-2 gap-3 text-sm sm:max-w-md">
               <Link
                 href="/registro"
                 className="rounded-2xl bg-[var(--accent)] px-4 py-3 text-center font-semibold text-white"
@@ -211,9 +212,7 @@ export default function DashboardPage() {
           </>
         )}
       </div>
-
-      <BottomNav active="/dashboard" />
-    </main>
+    </AppShell>
   );
 }
 

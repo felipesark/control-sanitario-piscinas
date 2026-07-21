@@ -3,8 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { AppHeader } from "@/components/AppHeader";
-import { BottomNav } from "@/components/BottomNav";
+import { AppShell } from "@/components/AppShell";
 import { SaveButton } from "@/components/ui";
 import type { SubscriptionInfo } from "@/lib/subscription";
 import { formatCop, getPlan, type PlanId } from "@/lib/plans";
@@ -62,7 +61,7 @@ function SuscripcionContent() {
   };
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4">
       {statusError ? (
         <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">{statusError}</div>
       ) : null}
@@ -169,12 +168,15 @@ function SuscripcionContent() {
 
 export default function SuscripcionPage() {
   return (
-    <main className="page-shell mx-auto max-w-lg">
-      <AppHeader title="Mi suscripcion" subtitle="Estado de cuenta y pagos" />
-      <Suspense fallback={<div className="p-4">Cargando...</div>}>
+    <AppShell
+      active="/suscripcion"
+      title="Mi suscripcion"
+      subtitle="Estado de cuenta y pagos"
+      width="narrow"
+    >
+      <Suspense fallback={<div className="py-4">Cargando...</div>}>
         <SuscripcionContent />
       </Suspense>
-      <BottomNav active="/suscripcion" />
-    </main>
+    </AppShell>
   );
 }

@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AppHeader } from "@/components/AppHeader";
-import { BottomNav } from "@/components/BottomNav";
+import { AppShell } from "@/components/AppShell";
 import { Field, NumberInput, SaveButton, SectionCard, TextInput, ToggleRow } from "@/components/ui";
 import type { ConfiguracionInstalacion, Operador } from "@/lib/types";
 import { defaultConfiguracion } from "@/lib/defaults";
@@ -69,13 +68,13 @@ export default function ConfiguracionPage() {
   };
 
   return (
-    <main className="page-shell mx-auto max-w-lg">
-      <AppHeader
-        title="Configuración"
-        subtitle="Datos de la instalación según el encabezado del libro estándar"
-      />
-
-      <div className="space-y-4 p-4">
+    <AppShell
+      active="/configuracion"
+      title="Configuración"
+      subtitle="Datos de la instalación según el encabezado del libro estándar"
+      width="wide"
+    >
+      <div className="mx-auto max-w-3xl space-y-4 lg:space-y-6">
         <SectionCard title="Datos de demostracion y sincronizacion">
           <p className="text-sm text-[var(--muted)]">
             Cargue datos de ejemplo para probar la app completa, o sincronice con Supabase en la nube.
@@ -283,8 +282,6 @@ export default function ConfiguracionPage() {
         ) : null}
         <SaveButton onClick={handleSave} label="Guardar configuración" />
       </div>
-
-      <BottomNav active="/configuracion" />
-    </main>
+    </AppShell>
   );
 }
