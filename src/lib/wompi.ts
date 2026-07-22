@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import type { PlanId } from "./plans";
 import { getPlan } from "./plans";
+import { getAppUrl } from "./app-url";
 
 export function isWompiConfigured(): boolean {
   return Boolean(
@@ -26,7 +27,7 @@ export async function createWompiPaymentLink(params: {
   instalacionId: string;
 }): Promise<{ url: string; linkId: string; reference: string }> {
   const plan = getPlan(params.plan);
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl = getAppUrl();
   const reference = `csp-${params.userId.slice(0, 8)}-${params.plan}-${Date.now()}`;
   const amountInCents = plan.precioCop * 100;
 

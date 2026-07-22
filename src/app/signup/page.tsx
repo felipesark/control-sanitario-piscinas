@@ -21,20 +21,30 @@ function SignupForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [needsConfirm, setNeedsConfirm] = useState(false);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     const supabase = createClient();
-    const { error: err } = await supabase.auth.signUp({
+    const { data, error: err } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } },
+      options: {
+        data: { full_name: fullName },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     });
     setLoading(false);
     if (err) {
       setError(err.message);
+      return;
+    }
+    // Si Supabase exige confirmar correo, no hay sesión aún
+    if (!data.session) {
+      setError("");
+      setNeedsConfirm(true);
       return;
     }
     router.push("/");
@@ -43,6 +53,21 @@ function SignupForm() {
 
   return (
     <form onSubmit={handleSignup}>
+      {needsConfirm ? (
+        <div className="space-y-4 text-center">
+          <div className="rounded-2xl border border-white/20 bg-white/10 px-4 py-4 text-sm text-white/90">
+            Te enviamos un correo a <strong>{email}</strong> para confirmar tu cuenta.
+            Abre el enlace desde ese mensaje para activarla.
+          </div>
+          <p className="text-sm text-white/80">
+            ¿Ya confirmaste?{" "}
+            <Link href="/login" className="font-bold text-white underline underline-offset-4 hover:text-[#48b4e4]">
+              Iniciar sesión
+            </Link>
+          </p>
+        </div>
+      ) : (
+        <>
       <div className="mb-5 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm text-white/90">
         Prueba gratis por {TRIAL_DAYS} días. Sin tarjeta de crédito.
       </div>
@@ -90,6 +115,8 @@ function SignupForm() {
           Iniciar sesión
         </Link>
       </p>
+        </>
+      )}
     </form>
   );
 }

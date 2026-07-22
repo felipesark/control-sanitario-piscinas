@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import type { PlanId } from "./plans";
+import { getAppUrl } from "./app-url";
 
 let stripe: Stripe | null = null;
 
@@ -30,7 +31,7 @@ export async function createStripeCheckoutSession(params: {
   instalacionId: string;
 }): Promise<string> {
   const stripeClient = getStripe();
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl = getAppUrl();
 
   const session = await stripeClient.checkout.sessions.create({
     mode: "subscription",
@@ -58,7 +59,7 @@ export async function createStripeCheckoutSession(params: {
 
 export async function createStripePortalSession(customerId: string): Promise<string> {
   const stripeClient = getStripe();
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl = getAppUrl();
   const session = await stripeClient.billingPortal.sessions.create({
     customer: customerId,
     return_url: `${appUrl}/suscripcion`,
