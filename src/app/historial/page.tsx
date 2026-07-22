@@ -72,7 +72,7 @@ export default function HistorialPage() {
     >
       <div className="space-y-4 lg:space-y-6">
         {registros.length > 0 ? (
-          <section className="rounded-2xl border border-[var(--border)] bg-white p-4 sm:p-5 lg:max-w-xl">
+          <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5 lg:max-w-xl">
             <h2 className="font-display text-lg font-semibold text-[var(--deep)]">Exportar</h2>
             <p className="mt-1 text-sm text-[var(--muted)]">
               Elige un rango de fechas y descarga en PDF o Excel.
@@ -127,7 +127,7 @@ export default function HistorialPage() {
         ) : null}
 
         {registros.length === 0 ? (
-          <div className="rounded-2xl border border-[var(--border)] bg-white p-6 text-center">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 text-center">
             <p className="text-[var(--muted)]">Aun no hay registros guardados.</p>
             <Link href="/registro" className="mt-3 inline-block text-sm font-semibold text-[var(--accent)]">
               Crear primer registro
@@ -142,7 +142,7 @@ export default function HistorialPage() {
             const alertas = evaluarRegistro(r).length;
 
             return (
-              <div key={r.id} className="rounded-2xl border border-[var(--border)] bg-white p-4 sm:p-5">
+              <div key={r.id} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5">
                 <Link href={`/registro?fecha=${r.fecha}`} className="block">
                   <div className="flex items-center justify-between gap-2">
                     <p className="font-display text-lg font-semibold text-[var(--deep)]">

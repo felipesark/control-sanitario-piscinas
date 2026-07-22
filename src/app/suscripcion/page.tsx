@@ -79,13 +79,13 @@ function SuscripcionContent() {
         </div>
       ) : null}
 
-      <section className="rounded-2xl border border-[var(--border)] bg-white p-4">
+      <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
         <h2 className="font-display text-lg font-semibold text-[var(--deep)]">Mi cuenta</h2>
         <p className="mt-1 text-sm text-[var(--muted)]">{email}</p>
       </section>
 
       {sub ? (
-        <section className="rounded-2xl border border-[var(--border)] bg-white p-4">
+        <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
           <h2 className="font-display text-lg font-semibold text-[var(--deep)]">Suscripcion</h2>
           <div className="mt-3 space-y-2 text-sm">
             <div className="flex justify-between">
@@ -137,7 +137,7 @@ function SuscripcionContent() {
           ) : null}
         </section>
       ) : configured && !sub && !statusError ? (
-        <section className="rounded-2xl border border-[var(--border)] bg-white p-4">
+        <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
           <p className="text-sm text-[var(--muted)]">
             No hay suscripcion activa. Elija un plan para continuar usando la app despues del periodo de prueba.
           </p>
@@ -150,7 +150,7 @@ function SuscripcionContent() {
         </section>
       ) : null}
 
-      <section className="rounded-2xl border border-[var(--border)] bg-white p-4">
+      <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
         <h2 className="font-display text-lg font-semibold text-[var(--deep)]">Precios</h2>
         <div className="mt-2 space-y-1 text-sm">
           <p>Mensual: {formatCop(getPlan("mensual").precioCop)}</p>

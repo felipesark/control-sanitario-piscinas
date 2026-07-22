@@ -1,17 +1,52 @@
 @import "tailwindcss";
 
-:root {
-  --background: #eef3f7;
-  --canvas: #eef3f7;
-  --foreground: #0f2b3d;
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  --brand-cyan: #48b4e4;
+  --brand-cyan-deep: #309cd8;
+  --brand-purple: #603c90;
+  --brand-purple-deep: #483084;
+  --brand-foam: #b4f0f0;
+  --background: #eaf7fc;
+  --canvas: #eaf7fc;
+  --foreground: #1d1640;
   --surface: #ffffff;
-  --deep: #0b3d5c;
-  --accent: #1a8f8f;
-  --accent-soft: #d8f1f1;
-  --foam: #d4eef5;
-  --muted: #5b7283;
-  --border: #d5e2ea;
-  --alert: #d95f4a;
+  --surface-elevated: #ffffff;
+  --deep: #483084;
+  --accent: #48b4e4;
+  --accent-soft: #d7f1fb;
+  --foam: #c8ebf7;
+  --muted: #667494;
+  --border: #c3e0f0;
+  --alert: #e85a5a;
+  --header-bg: rgba(255, 255, 255, 0.92);
+  --shadow-soft: 0 10px 30px rgba(72, 48, 132, 0.1);
+  --sidebar-width: 16.5rem;
+  --sidebar-collapsed: 4.75rem;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --brand-cyan: #48b4e4;
+  --brand-cyan-deep: #309cd8;
+  --brand-purple: #8b6bc4;
+  --brand-purple-deep: #603c90;
+  --brand-foam: #b4f0f0;
+  --background: #120c28;
+  --canvas: #120c28;
+  --foreground: #e8f6fc;
+  --surface: #1a1540;
+  --surface-elevated: #241d52;
+  --deep: #9fd6f2;
+  --accent: #48b4e4;
+  --accent-soft: #243060;
+  --foam: #1e2548;
+  --muted: #9aa8c4;
+  --border: #3a3568;
+  --alert: #ff7a6e;
+  --header-bg: rgba(26, 21, 64, 0.92);
+  --shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.4);
   --sidebar-width: 16.5rem;
   --sidebar-collapsed: 4.75rem;
 }
@@ -36,6 +71,7 @@ body {
   background: var(--canvas);
   color: var(--foreground);
   font-family: var(--font-body), system-ui, sans-serif;
+  transition: background-color 180ms ease, color 180ms ease;
 }
 
 .font-display {

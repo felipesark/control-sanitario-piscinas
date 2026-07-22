@@ -63,7 +63,7 @@ function PlanesContent() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:gap-6">
       {PLANS.map((plan) => (
-        <div key={plan.id} className="rounded-2xl border-2 border-[var(--border)] bg-white p-5 sm:p-6">
+        <div key={plan.id} className="rounded-2xl border-2 border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="font-display text-xl font-bold text-[var(--deep)]">{plan.nombre}</h2>
@@ -108,7 +108,7 @@ function PlanesContent() {
       ))}
       </div>
 
-      <div className="rounded-xl bg-white p-4 text-sm text-[var(--muted)]">
+      <div className="rounded-xl bg-[var(--surface)] p-4 text-sm text-[var(--muted)]">
         <p className="font-semibold text-[var(--deep)]">Metodos de pago</p>
         <ul className="mt-2 list-inside list-disc space-y-1">
           <li><strong>Wompi:</strong> PSE, Nequi, Daviplata, tarjetas debito/credito Colombia</li>

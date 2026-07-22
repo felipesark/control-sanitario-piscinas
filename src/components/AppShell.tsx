@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { APP_NAV_GROUPS, MOBILE_NAV } from "@/lib/nav";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 function BrandLogo({ className = "h-10 w-10" }: { className?: string }) {
   return (
@@ -188,6 +189,9 @@ export function AppShell({
           <SidebarNav active={active} collapsed={collapsed} />
 
           <div className="border-t border-[var(--border)] p-3">
+            <div className={`mb-2 flex ${collapsed ? "justify-center" : ""}`}>
+              <ThemeToggle />
+            </div>
             {!collapsed ? (
               <Link
                 href="/suscripcion"
@@ -211,7 +215,7 @@ export function AppShell({
           type="button"
           aria-label={collapsed ? "Expandir menú" : "Colapsar menú"}
           onClick={() => setCollapsed((v) => !v)}
-          className="absolute top-20 -right-3 z-20 flex h-7 w-7 items-center justify-center rounded-full border border-[var(--border)] bg-white text-[var(--deep)] shadow-sm"
+          className="absolute top-20 -right-3 z-20 flex h-7 w-7 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--deep)] shadow-sm"
         >
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
             <path d={collapsed ? "M9 6l6 6-6 6" : "M15 6l-6 6 6 6"} />
@@ -228,7 +232,7 @@ export function AppShell({
             aria-label="Cerrar menú"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="absolute inset-y-0 left-0 flex w-[min(18rem,86vw)] flex-col bg-white shadow-xl">
+          <aside className="absolute inset-y-0 left-0 flex w-[min(18rem,86vw)] flex-col bg-[var(--surface)] shadow-xl">
             <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-4">
               <Link
                 href="/"
@@ -256,7 +260,7 @@ export function AppShell({
 
       {/* Main column */}
       <div className="app-main flex min-h-dvh min-w-0 flex-col">
-        <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-white/95 backdrop-blur-md safe-top">
+        <header className="sticky top-0 z-40 border-b border-[var(--border)] safe-top" style={{ background: "var(--header-bg)", backdropFilter: "blur(12px)" }}>
           <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
             <div className="flex min-w-0 items-center gap-3">
               <button
@@ -280,6 +284,7 @@ export function AppShell({
             </div>
 
             <div className="flex shrink-0 items-center gap-2">
+              <ThemeToggle />
               <Link
                 href="/registro"
                 className="hidden rounded-xl bg-[var(--accent)] px-3 py-2 text-sm font-semibold text-white sm:inline-flex"
@@ -307,7 +312,7 @@ export function AppShell({
       </div>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-[var(--border)] bg-white/95 backdrop-blur-md safe-bottom lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-[var(--border)] safe-bottom lg:hidden" style={{ background: "var(--header-bg)", backdropFilter: "blur(12px)" }}>
         <div className="mx-auto flex max-w-lg items-stretch justify-between px-1">
           {MOBILE_NAV.map((link) => {
             const isActive = active === link.href;
@@ -340,22 +345,67 @@ export function AuthShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-dvh bg-[var(--canvas)]">
-      <div className="relative isolate overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(26,143,143,0.16),_transparent_55%),linear-gradient(180deg,#0b3d5c_0%,#0b3d5c_26%,transparent_26%)]" />
-        <div className="relative mx-auto flex min-h-dvh max-w-lg flex-col justify-center px-4 py-10 sm:max-w-xl sm:px-6">
-          <div className="mb-6 text-center text-white">
-            <BrandLogo className="mx-auto h-28 w-28 drop-shadow-lg" />
-            <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--foam)]/80">
-              Control Sanitario · Piscinas sanas y seguras
-            </p>
-            <h1 className="mt-2 font-display text-3xl font-bold">{title}</h1>
-            {subtitle ? <p className="mt-2 text-sm text-[var(--foam)]/85">{subtitle}</p> : null}
+    <div className="min-h-dvh bg-[#eaf7fc]">
+      <div className="grid min-h-dvh lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+        <section
+          className="relative hidden overflow-hidden lg:flex lg:flex-col"
+          aria-label="Marca"
+          style={{
+            background:
+              "radial-gradient(circle at 20% 20%, rgba(72,180,228,0.22), transparent 42%), radial-gradient(circle at 80% 70%, rgba(96,60,144,0.12), transparent 45%), linear-gradient(160deg,#ffffff 0%,#eaf7fc 55%,#e4f0ff 100%)",
+          }}
+        >
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(115deg, transparent 58%, rgba(96,60,144,0.08) 58%, rgba(72,180,228,0.14) 100%)",
+            }}
+          />
+          {/* Wordmark superior izquierda */}
+          <div className="relative z-[1] px-10 pt-8">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-arespool-mark.png"
+              alt="Arespool"
+              className="h-12 w-auto object-contain object-left"
+            />
           </div>
-          <div className="rounded-3xl border border-[var(--border)] bg-white p-5 shadow-xl shadow-[var(--deep)]/10 sm:p-8">
-            {children}
+          {/* Logo principal: más grande y un poco más a la derecha */}
+          <div className="relative z-[1] flex flex-1 items-center justify-center pb-8 pl-16 pr-2 pt-16">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-arespool.png"
+              alt="Arespool"
+              className="ml-16 w-[min(32rem,94%)] translate-y-4 object-contain drop-shadow-[0_18px_30px_rgba(72,48,132,0.18)]"
+            />
           </div>
-        </div>
+        </section>
+
+        <section
+          className="relative flex min-h-dvh items-center justify-center px-5 py-12 text-white lg:pl-16 lg:[clip-path:polygon(12%_0,100%_0,100%_100%,0_100%)]"
+          style={{
+            background:
+              "radial-gradient(ellipse at 70% 15%, rgba(72,180,228,0.32), transparent 45%), linear-gradient(155deg,#603c90 0%,#483084 45%,#2a1a52 100%)",
+          }}
+        >
+          <div className="w-full max-w-sm">
+            {/* Móvil: mismo logo de piscina arriba (no el wordmark) */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-arespool.png"
+              alt="Arespool"
+              className="mb-6 block h-28 w-auto object-contain max-lg:mx-auto lg:hidden"
+            />
+            <h1 className="font-display text-[clamp(2rem,4vw,2.6rem)] font-bold tracking-tight max-lg:text-center">
+              {title}
+            </h1>
+            {subtitle ? (
+              <p className="mt-2 text-[0.95rem] text-white/80 max-lg:text-center">{subtitle}</p>
+            ) : null}
+            <div className="mt-8">{children}</div>
+          </div>
+        </section>
       </div>
     </div>
   );

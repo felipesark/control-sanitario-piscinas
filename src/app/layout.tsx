@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Fraunces } from "next/font/google";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
 const bodyFont = DM_Sans({
@@ -34,10 +35,27 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b3d5c",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#48b4e4" },
+    { media: "(prefers-color-scheme: dark)", color: "#120c28" },
+  ],
   width: "device-width",
   initialScale: 1,
 };
+
+const themeInitScript = `
+(function(){
+  try {
+    var key = 'csp-theme';
+    var stored = localStorage.getItem(key);
+    var theme = (stored === 'light' || stored === 'dark')
+      ? stored
+      : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.style.colorScheme = theme;
+  } catch (e) {}
+})();
+`;
 
 export default function RootLayout({
   children,
@@ -50,8 +68,11 @@ export default function RootLayout({
       className={`${bodyFont.variable} ${displayFont.variable} h-full`}
       suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="min-h-full antialiased" suppressHydrationWarning>
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

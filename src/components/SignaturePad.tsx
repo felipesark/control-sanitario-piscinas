@@ -23,7 +23,7 @@ export function SignaturePad({ value, onChange, label = "Firma del operador" }: 
     canvas.width = rect.width * ratio;
     canvas.height = rect.height * ratio;
     ctx.scale(ratio, ratio);
-    ctx.strokeStyle = "#0b3d5c";
+    ctx.strokeStyle = "#483084";
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
@@ -86,7 +86,7 @@ export function SignaturePad({ value, onChange, label = "Firma del operador" }: 
   return (
     <div className="space-y-2">
       <p className="text-sm font-medium">{label}</p>
-      <div className="overflow-hidden rounded-xl border-2 border-dashed border-[var(--border)] bg-white">
+      <div className="overflow-hidden rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--surface)]">
         <canvas
           ref={canvasRef}
           className="h-36 w-full touch-none"

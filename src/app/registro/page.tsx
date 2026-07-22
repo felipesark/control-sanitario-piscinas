@@ -22,7 +22,7 @@ function RegistroContent() {
       width="narrow"
     >
       <div className="space-y-4">
-        <label className="block rounded-2xl border border-[var(--border)] bg-white p-4 sm:p-5">
+        <label className="block rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5">
           <span className="mb-2 block text-sm font-medium">Seleccionar fecha</span>
           <input
             type="date"

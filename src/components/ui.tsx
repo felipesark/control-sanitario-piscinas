@@ -24,7 +24,7 @@ export function Field({ label, hint, children }: FieldProps) {
 
 export function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
-    <input {...props} className={`w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2.5 text-base outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 ${props.className ?? ""}`} />
+    <input {...props} className={`w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 ${props.className ?? ""}`} />
   );
 }
 
@@ -34,24 +34,24 @@ export function NumberInput(props: React.InputHTMLAttributes<HTMLInputElement>) 
 
 export function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
-    <textarea {...props} className={`min-h-24 w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2.5 text-base outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 ${props.className ?? ""}`} />
+    <textarea {...props} className={`min-h-24 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 ${props.className ?? ""}`} />
   );
 }
 
 export function SelectInput(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
-    <select {...props} className={`w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2.5 text-base outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 ${props.className ?? ""}`} />
+    <select {...props} className={`w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-base text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 ${props.className ?? ""}`} />
   );
 }
 
 export function ToggleRow({ label, checked, onChange, badge }: { label: string; checked: boolean; onChange: (value: boolean) => void; badge?: string; }) {
   return (
-    <button type="button" onClick={() => onChange(!checked)} className={`flex w-full items-center justify-between rounded-xl border px-3 py-3 text-left transition ${checked ? "border-[var(--accent)] bg-[var(--accent)]/10" : "border-[var(--border)] bg-white"}`}>
-      <span className="pr-3 text-sm font-medium">{label}</span>
+    <button type="button" onClick={() => onChange(!checked)} className={`flex w-full items-center justify-between rounded-xl border px-3 py-3 text-left transition ${checked ? "border-[var(--accent)] bg-[var(--accent)]/10" : "border-[var(--border)] bg-[var(--surface)]"}`}>
+      <span className="pr-3 text-sm font-medium text-[var(--foreground)]">{label}</span>
       <span className="flex items-center gap-2">
         {badge ? <span className="rounded-full bg-[var(--foam)] px-2 py-0.5 text-[10px] font-semibold uppercase text-[var(--deep)]">{badge}</span> : null}
         <span className={`flex h-6 w-11 items-center rounded-full p-0.5 transition ${checked ? "bg-[var(--accent)]" : "bg-[var(--border)]"}`}>
-          <span className={`h-5 w-5 rounded-full bg-white shadow transition ${checked ? "translate-x-5" : "translate-x-0"}`} />
+          <span className={`h-5 w-5 rounded-full bg-[var(--surface-elevated)] shadow transition ${checked ? "translate-x-5" : "translate-x-0"}`} />
         </span>
       </span>
     </button>

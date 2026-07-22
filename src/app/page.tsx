@@ -73,7 +73,7 @@ export default function HomePage() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-[var(--border)] bg-white p-4 sm:p-5 lg:col-span-2">
+          <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5 lg:col-span-2">
             <h2 className="font-display text-lg font-semibold text-[var(--deep)]">
               Estado sanitario de hoy
             </h2>
@@ -94,7 +94,7 @@ export default function HomePage() {
           </Link>
           <Link
             href="/visitas"
-            className="rounded-2xl border border-[var(--border)] bg-white px-4 py-4 text-center sm:p-5"
+            className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-4 text-center sm:p-5"
           >
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Visitas</p>
             <p className="mt-1 font-display text-lg font-bold text-[var(--deep)]">
@@ -106,7 +106,7 @@ export default function HomePage() {
         </div>
 
         <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
-          <section className="rounded-2xl border border-[var(--border)] bg-white p-4 sm:p-5">
+          <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5">
             <h2 className="font-display text-lg font-semibold text-[var(--deep)]">Sincronizacion</h2>
             <p className="mt-2 text-sm text-[var(--muted)]">
               {syncStatus.configured
@@ -120,7 +120,7 @@ export default function HomePage() {
             </Link>
           </section>
 
-          <section className="rounded-2xl border border-[var(--border)] bg-white p-4 sm:p-5">
+          <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5">
             <h2 className="font-display text-lg font-semibold text-[var(--deep)]">Marco normativo</h2>
             <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
               Basado en el Libro Estándar de Registro de Control Sanitario de Estanques de Piscinas
@@ -135,7 +135,7 @@ export default function HomePage() {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-white p-4 sm:p-5">
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5">
       <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">{label}</p>
       <p className="mt-1 font-display text-2xl font-bold text-[var(--deep)]">{value}</p>
     </div>

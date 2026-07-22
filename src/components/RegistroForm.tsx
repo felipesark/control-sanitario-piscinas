@@ -79,7 +79,7 @@ export function RegistroForm({ fecha, operadores, salvavidas, onSaved }: Registr
             className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition ${
               tab === i
                 ? "bg-[var(--deep)] text-white"
-                : "bg-white text-[var(--muted)] border border-[var(--border)]"
+                : "bg-[var(--surface)] text-[var(--muted)] border border-[var(--border)]"
             }`}
           >
             {label}
@@ -96,7 +96,7 @@ export function RegistroForm({ fecha, operadores, salvavidas, onSaved }: Registr
           <SectionCard title="Responsables del día" description="Operador y salvavidas según el libro estándar.">
             <Field label="Operador responsable (OPR)">
               <select
-                className="w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2.5"
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5"
                 value={registro.operadorId}
                 onChange={(e) => update({ operadorId: e.target.value })}
               >
@@ -110,7 +110,7 @@ export function RegistroForm({ fecha, operadores, salvavidas, onSaved }: Registr
             </Field>
             <Field label="Personal de rescate (salvavidas)">
               <select
-                className="w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2.5"
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5"
                 value={registro.salvavidasId}
                 onChange={(e) => update({ salvavidasId: e.target.value })}
               >

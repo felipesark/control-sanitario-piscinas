@@ -21,8 +21,8 @@ import { AppShell } from "@/components/AppShell";
 import { useAppData } from "@/hooks/useAppData";
 import { buildDashboardMetrics } from "@/lib/dashboard-metrics";
 
-const DEEP = "#0b3d5c";
-const ACCENT = "#1a8f8f";
+const DEEP = "#483084";
+const ACCENT = "#48b4e4";
 const ALERT = "#d95f4a";
 const FOAM = "#7eb8c9";
 
@@ -51,7 +51,7 @@ export default function DashboardPage() {
       width="wide"
     >
       <div className="space-y-4 lg:space-y-6">
-        <div className="flex items-center justify-between rounded-2xl border border-[var(--border)] bg-white px-4 py-3 sm:px-5">
+        <div className="flex items-center justify-between rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 sm:px-5">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2.5 w-2.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--accent)] opacity-60" />
@@ -65,7 +65,7 @@ export default function DashboardPage() {
         {!ready || !metrics ? (
           <p className="text-sm text-[var(--muted)]">Cargando indicadores…</p>
         ) : metrics.serie.length === 0 ? (
-          <section className="rounded-2xl border border-[var(--border)] bg-white p-6 text-center">
+          <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 text-center">
             <p className="text-[var(--muted)]">Aún no hay registros para graficar.</p>
             <Link
               href="/registro"
@@ -204,7 +204,7 @@ export default function DashboardPage() {
               </Link>
               <Link
                 href="/historial"
-                className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-center font-semibold text-[var(--deep)]"
+                className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-center font-semibold text-[var(--deep)]"
               >
                 Ver historial
               </Link>
@@ -232,7 +232,7 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-[var(--border)] bg-white p-4">
+    <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
       <h2 className="font-display text-lg font-semibold text-[var(--deep)]">{title}</h2>
       {hint ? <p className="mt-0.5 text-xs text-[var(--muted)]">{hint}</p> : null}
       <div className="mt-3">{children}</div>
@@ -254,7 +254,7 @@ function Kpi({
       ? "border-[var(--accent)]/40 bg-[var(--accent)]/10"
       : tone === "alert"
         ? "border-[var(--alert)]/40 bg-[var(--alert)]/10"
-        : "border-[var(--border)] bg-white";
+        : "border-[var(--border)] bg-[var(--surface)]";
 
   return (
     <div className={`rounded-2xl border p-3 ${toneClass}`}>
