@@ -3,6 +3,7 @@
 import type { AppData } from "./types";
 import { getAppData, setAppData } from "./storage";
 import { getSupabase, isSupabaseConfigured } from "./supabase";
+import { refreshConfiguracion } from "./instalaciones";
 
 export interface SyncResult {
   ok: boolean;
@@ -28,20 +29,36 @@ export async function sincronizarConNube(): Promise<SyncResult> {
   }
 
   const data = getAppData();
-  const instalacionId = data.instalacionId;
 
   try {
-    const { error: errConfig } = await supabase.from("instalaciones").upsert({
-      id: instalacionId,
-      configuracion: data.configuracion,
-      updated_at: new Date().toISOString(),
-    });
-    if (errConfig) throw errConfig;
+    for (const inst of data.instalaciones) {
+      const vista: AppData = {
+        ...data,
+        instalacionActivaId: inst.id,
+        instalacionId: inst.id,
+      };
+      const configuracion = refreshConfiguracion(vista);
+      const { error: errConfig } = await supabase.from("instalaciones").upsert({
+        id: inst.id,
+        configuracion: {
+          ...configuracion,
+          _meta: {
+            establecimiento: data.establecimiento,
+            zonasHumedas: data.zonasHumedas,
+            instalaciones: data.instalaciones,
+            conteosBanistas: data.conteosBanistas,
+          },
+        },
+        updated_at: new Date().toISOString(),
+      });
+      if (errConfig) throw errConfig;
+    }
 
-    if (data.registros.length > 0) {
-      const rows = data.registros.map((r) => ({
+    const registros = data.registros;
+    if (registros.length > 0) {
+      const rows = registros.map((r) => ({
         id: r.id,
-        instalacion_id: instalacionId,
+        instalacion_id: r.instalacionId,
         fecha: r.fecha,
         data: r,
         updated_at: r.actualizadoEn,
@@ -53,7 +70,7 @@ export async function sincronizarConNube(): Promise<SyncResult> {
     if (data.visitas.length > 0) {
       const rows = data.visitas.map((v) => ({
         id: v.id,
-        instalacion_id: instalacionId,
+        instalacion_id: data.instalacionActivaId,
         data: v,
         updated_at: new Date().toISOString(),
       }));
@@ -61,22 +78,9 @@ export async function sincronizarConNube(): Promise<SyncResult> {
       if (errVis) throw errVis;
     }
 
-    const { data: remota, error: errPull } = await supabase
-      .from("instalaciones")
-      .select("configuracion, updated_at")
-      .eq("id", instalacionId)
-      .single();
-
-    if (!errPull && remota) {
-      const local = getAppData();
-      local.configuracion = remota.configuracion;
-      local.ultimaSincronizacion = new Date().toISOString();
-      setAppData(local);
-    } else {
-      const local = getAppData();
-      local.ultimaSincronizacion = new Date().toISOString();
-      setAppData(local);
-    }
+    const local = getAppData();
+    local.ultimaSincronizacion = new Date().toISOString();
+    setAppData(local);
 
     return {
       ok: true,
@@ -117,6 +121,7 @@ export async function descargarDesdeNube(instalacionId: string): Promise<SyncRes
 
     const local = getAppData();
     local.instalacionId = instalacionId;
+    local.instalacionActivaId = instalacionId;
     local.configuracion = inst.configuracion;
     local.registros = (registros ?? []).map((r) => r.data);
     local.visitas = (visitas ?? []).map((v) => v.data);

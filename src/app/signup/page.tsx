@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { AuthShell } from "@/components/AppShell";
 import { TRIAL_DAYS } from "@/lib/plans";
+import { formatAuthError } from "@/lib/auth-errors";
 
 const fieldClass = "mb-5 block";
 const labelClass = "mb-1.5 block text-[0.82rem] font-semibold tracking-wide text-white/90";
@@ -38,7 +39,7 @@ function SignupForm() {
     });
     setLoading(false);
     if (err) {
-      setError(err.message);
+      setError(formatAuthError(err.message));
       return;
     }
     // Si Supabase exige confirmar correo, no hay sesión aún

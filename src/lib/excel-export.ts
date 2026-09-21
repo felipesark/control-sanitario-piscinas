@@ -15,9 +15,21 @@ function val(v: unknown): string | number {
 
 function buildResumenRows(data: AppData, registros: RegistroDiario[]) {
   return registros.map((r) => {
-    const op = data.configuracion.operadores.find((o) => o.id === r.operadorId);
-    const sv = data.configuracion.salvavidas.find((s) => s.id === r.salvavidasId);
-    const alertas = evaluarRegistro(r);
+    const op = data.establecimiento.operadores.find((o) => o.id === r.operadorId);
+    const sv = data.establecimiento.salvavidas.find((s) => s.id === r.salvavidasId);
+    const tipo =
+      data.instalaciones.find((i) => i.id === r.instalacionId)?.tipoEstructura ??
+      data.configuracion.tipoEstructura ??
+      "IA";
+    const categoria =
+      data.instalaciones.find((i) => i.id === r.instalacionId)?.categoria ??
+      data.configuracion.categoria ??
+      null;
+    const alertas = evaluarRegistro(
+      r,
+      { tipoEstructura: tipo, categoria },
+      data.rangosCatalogo,
+    );
     const labores = Object.values(r.labores).filter(Boolean).length;
 
     return {

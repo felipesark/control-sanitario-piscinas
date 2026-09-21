@@ -23,7 +23,9 @@ function defaultRango(fechas: string[]): { desde: string; hasta: string } {
 
 export default function HistorialPage() {
   const { data } = useAppData();
-  const registros = data?.registros ?? [];
+  const registros = (data?.registros ?? []).filter(
+    (r) => r.instalacionId === data?.instalacionActivaId,
+  );
   const hoy = formatFechaHoy();
   const [desde, setDesde] = useState(() => `${hoy.slice(0, 7)}-01`);
   const [hasta, setHasta] = useState(hoy);
@@ -136,10 +138,17 @@ export default function HistorialPage() {
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {registros.map((r) => {
-            const operador = data?.configuracion.operadores.find((o) => o.id === r.operadorId);
+            const operador = data?.establecimiento.operadores.find((o) => o.id === r.operadorId);
             const laboresCompletadas = Object.values(r.labores).filter(Boolean).length;
             const totalLabores = Object.keys(r.labores).length;
-            const alertas = evaluarRegistro(r).length;
+            const alertas = evaluarRegistro(
+              r,
+              {
+                tipoEstructura: data?.configuracion.tipoEstructura ?? "IA",
+                categoria: data?.configuracion.categoria ?? null,
+              },
+              data?.rangosCatalogo,
+            ).length;
 
             return (
               <div key={r.id} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5">
@@ -155,7 +164,9 @@ export default function HistorialPage() {
                   <p className="mt-1 text-sm text-[var(--muted)]">
                     Operador: {operador?.nombre || "Sin asignar"}
                     {alertas > 0 ? ` · ${alertas} alerta(s)` : ""}
-                    {r.firmaOperador ? " · Firmado" : " · Sin firma"}
+                    {r.estadoDia === "cerrado" || r.firmaOperador
+                      ? " · Cerrado"
+                      : " · En progreso"}
                   </p>
                   <p className="text-xs text-[var(--muted)]">
                     Actualizado: {new Date(r.actualizadoEn).toLocaleString("es-CO")}

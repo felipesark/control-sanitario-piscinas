@@ -167,6 +167,7 @@ export function AppShell({
   return (
     <div
       className={`app-frame min-h-dvh bg-[var(--canvas)] ${collapsed ? "app-frame--collapsed" : ""}`}
+      suppressHydrationWarning
     >
       {/* Desktop sidebar */}
       <aside className="app-sidebar relative hidden lg:flex">
@@ -345,11 +346,12 @@ export function AuthShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-dvh bg-[#eaf7fc]">
-      <div className="grid min-h-dvh lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+    <div className="min-h-dvh bg-[#eaf7fc]" suppressHydrationWarning>
+      <div className="grid min-h-dvh lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]" suppressHydrationWarning>
         <section
           className="relative hidden overflow-hidden lg:flex lg:flex-col"
           aria-label="Marca"
+          suppressHydrationWarning
           style={{
             background:
               "radial-gradient(circle at 20% 20%, rgba(72,180,228,0.22), transparent 42%), radial-gradient(circle at 80% 70%, rgba(96,60,144,0.12), transparent 45%), linear-gradient(160deg,#ffffff 0%,#eaf7fc 55%,#e4f0ff 100%)",
@@ -357,6 +359,7 @@ export function AuthShell({
         >
           <div
             className="pointer-events-none absolute inset-0"
+            suppressHydrationWarning
             style={{
               background:
                 "linear-gradient(115deg, transparent 58%, rgba(96,60,144,0.08) 58%, rgba(72,180,228,0.14) 100%)",

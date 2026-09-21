@@ -1,6 +1,7 @@
-import type { AppData, RegistroDiario } from "./types";
-import { evaluarRegistro, RANGOS } from "./rangos-legales";
+import type { AppData, RegistroDiario, TipoEstructura } from "./types";
+import { evaluarRegistro, obtenerRangos } from "./rangos-legales";
 import { formatFechaHoy, formatFechaLegible } from "./storage";
+import { getInstalacionActiva } from "./instalaciones";
 
 export interface SerieCalidad {
   fecha: string;
@@ -34,16 +35,19 @@ export interface DashboardMetrics {
   };
 }
 
-function ultimoValor(
-  ...valores: Array<number | null | undefined>
-): number | null {
+function ultimoValor(...valores: Array<number | null | undefined>): number | null {
   for (const v of valores) {
     if (v !== null && v !== undefined) return v;
   }
   return null;
 }
 
-function toSerie(registro: RegistroDiario): SerieCalidad {
+function toSerie(
+  registro: RegistroDiario,
+  tipo: TipoEstructura,
+  categoria: AppData["configuracion"]["categoria"],
+  catalogo: AppData["rangosCatalogo"],
+): SerieCalidad {
   const ph = ultimoValor(
     registro.calidadQuimica.ph.tarde,
     registro.calidadQuimica.ph.mediodia,
@@ -62,28 +66,38 @@ function toSerie(registro: RegistroDiario): SerieCalidad {
     cloro,
     turbidez: registro.calidadQuimica.turbidez,
     banistas: registro.condiciones.numeroBanistas,
-    alertas: evaluarRegistro(registro).length,
+    alertas: evaluarRegistro(
+      registro,
+      { tipoEstructura: tipo, categoria },
+      catalogo,
+    ).length,
   };
 }
 
 export function buildDashboardMetrics(data: AppData, dias = 14): DashboardMetrics {
   const hoy = formatFechaHoy();
-  const ordenados = [...data.registros].sort((a, b) => a.fecha.localeCompare(b.fecha));
-  const serie = ordenados.slice(-dias).map(toSerie);
-  const registroHoy = data.registros.find((r) => r.fecha === hoy);
-  const alertasHoy = registroHoy ? evaluarRegistro(registroHoy).length : 0;
+  const activa = getInstalacionActiva(data);
+  const tipo = activa.tipoEstructura;
+  const categoria = activa.categoria;
+  const catalogo = data.rangosCatalogo;
+  const rangos = obtenerRangos({ tipoEstructura: tipo, categoria }, null, catalogo);
+  const delLibro = data.registros.filter((r) => r.instalacionId === activa.id);
+  const ordenados = [...delLibro].sort((a, b) => a.fecha.localeCompare(b.fecha));
+  const serie = ordenados.slice(-dias).map((r) => toSerie(r, tipo, categoria, catalogo));
+  const registroHoy = delLibro.find((r) => r.fecha === hoy);
+  const alertasHoy = registroHoy
+    ? evaluarRegistro(registroHoy, { tipoEstructura: tipo, categoria }, catalogo).length
+    : 0;
 
   const diasConAlerta = serie.filter((s) => s.alertas > 0).length;
   const diasOk = serie.filter((s) => s.alertas === 0).length;
   const conDatos = serie.length;
-  const cumplimientoPct =
-    conDatos > 0 ? Math.round((diasOk / conDatos) * 100) : null;
-
+  const cumplimientoPct = conDatos > 0 ? Math.round((diasOk / conDatos) * 100) : null;
   const ultimo = serie[serie.length - 1];
 
   return {
     hoy,
-    totalRegistros: data.registros.length,
+    totalRegistros: delLibro.length,
     totalVisitas: data.visitas.length,
     registrosUltimos14: serie.length,
     alertasHoy,
@@ -95,11 +109,11 @@ export function buildDashboardMetrics(data: AppData, dias = 14): DashboardMetric
     ultimaTurbidez: ultimo?.turbidez ?? null,
     serie,
     rangos: {
-      phMin: RANGOS.ph.min ?? 7.2,
-      phMax: RANGOS.ph.max ?? 8,
-      cloroMin: RANGOS.cloroLibre.min ?? 1,
-      cloroMax: RANGOS.cloroLibre.max ?? 3,
-      turbidezMax: RANGOS.turbidez.max ?? 5,
+      phMin: rangos.ph?.min ?? 7.2,
+      phMax: rangos.ph?.max ?? 8,
+      cloroMin: rangos.cloroLibre?.min ?? 1,
+      cloroMax: rangos.cloroLibre?.max ?? 3,
+      turbidezMax: rangos.turbidez?.max ?? 5,
     },
   };
 }

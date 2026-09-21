@@ -15,9 +15,21 @@ export default function HomePage() {
   const { data, ready } = useAppData();
   const hoy = formatFechaHoy();
   const config = data?.configuracion;
-  const registroHoy = data?.registros.find((r) => r.fecha === hoy);
+  const instalacionId = data?.instalacionActivaId;
+  const registroHoy = data?.registros.find(
+    (r) => r.fecha === hoy && r.instalacionId === instalacionId,
+  );
   const configCompleta = Boolean(config?.razonSocial && config?.nombreEstanque);
-  const alertasHoy = registroHoy ? evaluarRegistro(registroHoy) : [];
+  const alertasHoy = registroHoy
+    ? evaluarRegistro(
+        registroHoy,
+        {
+          tipoEstructura: config?.tipoEstructura ?? "IA",
+          categoria: config?.categoria ?? null,
+        },
+        data?.rangosCatalogo,
+      )
+    : [];
   const syncStatus = ready ? getSyncStatus() : { configured: false, lastSync: null };
 
   return (

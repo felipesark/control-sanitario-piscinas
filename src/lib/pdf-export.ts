@@ -50,7 +50,9 @@ export function exportarRegistroPDF(data: AppData, registro: RegistroDiario): vo
     body: [
       ["Hora inicio / final", `${registro.condiciones.horaInicio} - ${registro.condiciones.horaFinal}`],
       ["Temperatura aire (C)", val(registro.condiciones.temperaturaAire)],
-      ["Humedad relativa (%)", val(registro.condiciones.humedadRelativa)],
+      ...(cfg.presentacionCubierta
+        ? [["Humedad relativa (%)", val(registro.condiciones.humedadRelativa)] as [string, string | number]]
+        : []),
       ["Numero banistas", val(registro.condiciones.numeroBanistas)],
       ["Horas filtracion", val(registro.condiciones.horasFiltracion)],
       ["Presion trabajo (psi)", val(registro.condiciones.presionTrabajo)],
@@ -109,7 +111,19 @@ export function exportarRegistroPDF(data: AppData, registro: RegistroDiario): vo
 
   y = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 5;
 
-  const alertas = evaluarRegistro(registro);
+  const tipo =
+    data.instalaciones.find((i) => i.id === registro.instalacionId)?.tipoEstructura ??
+    data.configuracion.tipoEstructura ??
+    "IA";
+  const categoria =
+    data.instalaciones.find((i) => i.id === registro.instalacionId)?.categoria ??
+    data.configuracion.categoria ??
+    null;
+  const alertas = evaluarRegistro(
+    registro,
+    { tipoEstructura: tipo, categoria },
+    data.rangosCatalogo,
+  );
   if (alertas.length > 0) {
     autoTable(doc, {
       startY: y,
@@ -184,8 +198,20 @@ export function exportarLibroRangoPDF(
     startY: 28,
     head: [["Fecha", "Operador", "pH (M)", "Cloro (M)", "Turbidez", "Banistas", "Labores", "Alertas"]],
     body: registros.map((r) => {
-      const op = data.configuracion.operadores.find((o) => o.id === r.operadorId);
-      const alertas = evaluarRegistro(r).length;
+      const op = data.establecimiento.operadores.find((o) => o.id === r.operadorId);
+      const tipo =
+        data.instalaciones.find((i) => i.id === r.instalacionId)?.tipoEstructura ??
+        data.configuracion.tipoEstructura ??
+        "IA";
+      const categoria =
+        data.instalaciones.find((i) => i.id === r.instalacionId)?.categoria ??
+        data.configuracion.categoria ??
+        null;
+      const alertas = evaluarRegistro(
+        r,
+        { tipoEstructura: tipo, categoria },
+        data.rangosCatalogo,
+      ).length;
       const labores = Object.values(r.labores).filter(Boolean).length;
       return [
         formatFechaLegible(r.fecha),

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { AuthShell } from "@/components/AppShell";
+import { formatAuthError } from "@/lib/auth-errors";
 
 const fieldClass = "mb-5 block";
 const labelClass = "mb-1.5 block text-[0.82rem] font-semibold tracking-wide text-white/90";
@@ -45,7 +46,7 @@ export default function LoginForm() {
     const { error: err } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (err) {
-      setError(err.message);
+      setError(formatAuthError(err.message));
       return;
     }
     router.push(redirect);

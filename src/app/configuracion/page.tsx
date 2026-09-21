@@ -5,7 +5,9 @@ import { AppShell } from "@/components/AppShell";
 import { Field, NumberInput, SaveButton, SectionCard, TextInput, ToggleRow } from "@/components/ui";
 import type { ConfiguracionInstalacion, Operador } from "@/lib/types";
 import { defaultConfiguracion } from "@/lib/defaults";
-import { getAppData, loadSampleData, saveConfiguracion } from "@/lib/storage";
+import { getAppData, loadSampleData, saveConfiguracion, saveRangosCatalogo, setAppData, setInstalacionActiva } from "@/lib/storage";
+import { agregarInstalacion } from "@/lib/instalaciones";
+import { fusionarBorradorOcr, resumenEstadoCatalogo } from "@/lib/rangos-legales";
 import { getSyncStatus, sincronizarConNube } from "@/lib/sync";
 
 function parseNum(value: string): number | null {
@@ -60,6 +62,22 @@ export default function ConfiguracionPage() {
     setSaved(true);
   };
 
+  const handleAddInstalacion = () => {
+    handleSave();
+    const next = agregarInstalacion(getAppData(), {
+      nombre: `Instalacion ${getAppData().instalaciones.length + 1}`,
+    });
+    setAppData(next);
+    setConfig(next.configuracion);
+    setSaved(true);
+  };
+
+  const handleSelectInstalacion = (id: string) => {
+    handleSave();
+    setInstalacionActiva(id);
+    setConfig(getAppData().configuracion);
+  };
+
   const handleSync = async () => {
     setSyncing(true);
     const result = await sincronizarConNube();
@@ -75,6 +93,41 @@ export default function ConfiguracionPage() {
       width="wide"
     >
       <div className="mx-auto max-w-3xl space-y-4 lg:space-y-6">
+        <SectionCard
+          title="Motor de rangos (Res. 234 / 2026)"
+          description="Tabla configurable por tipo y categoria. Produccion deshabilitada hasta confirmacion visual del Anexo Tecnico I."
+        >
+          {(() => {
+            const cat = getAppData().rangosCatalogo;
+            const estado = resumenEstadoCatalogo(cat);
+            return (
+              <>
+                <p className="rounded-xl bg-sky-50 px-3 py-2 text-sm text-sky-900">{estado.mensaje}</p>
+                <p className="text-xs text-[var(--muted)]">
+                  Version: {cat.version} · Confirmadas activas: {estado.confirmadas} · Borradores OCR:{" "}
+                  {estado.borradores}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = fusionarBorradorOcr(getAppData().rangosCatalogo);
+                    saveRangosCatalogo(next);
+                    setSaved(true);
+                  }}
+                  className="w-full rounded-xl border border-dashed border-[var(--accent)] py-2 text-sm font-medium text-[var(--accent)]"
+                >
+                  Cargar borrador OCR (sin activar produccion)
+                </button>
+                <p className="text-xs text-[var(--muted)]">
+                  El borrador incluye el conflicto de cloro libre (0.2-3.0 vs 2.0-4.0). No marca filas como
+                  confirmadas ni habilita alarmas. Siguiente paso: foto del Anexo Tecnico I y confirmacion
+                  humana fila a fila.
+                </p>
+              </>
+            );
+          })()}
+        </SectionCard>
+
         <SectionCard title="Datos de demostracion y sincronizacion">
           <p className="text-sm text-[var(--muted)]">
             Cargue datos de ejemplo para probar la app completa, o sincronice con Supabase en la nube.
@@ -105,6 +158,27 @@ export default function ConfiguracionPage() {
             {syncing ? "Sincronizando..." : "Sincronizar con la nube"}
           </button>
           {syncMsg ? <p className="text-sm text-[var(--muted)]">{syncMsg}</p> : null}
+        </SectionCard>
+
+        <SectionCard title="Instalaciones del establecimiento" description="Cada una tiene su propio libro diario.">
+          <select
+            className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5"
+            value={getAppData().instalacionActivaId}
+            onChange={(e) => handleSelectInstalacion(e.target.value)}
+          >
+            {getAppData().instalaciones.map((inst) => (
+              <option key={inst.id} value={inst.id}>
+                {inst.nombre} · {inst.tipoEstructura}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={handleAddInstalacion}
+            className="w-full rounded-xl border border-dashed border-[var(--accent)] py-2 text-sm font-medium text-[var(--accent)]"
+          >
+            + Agregar instalacion (piscina, spa, etc.)
+          </button>
         </SectionCard>
 
         <SectionCard title="Datos de la empresa">
@@ -209,6 +283,52 @@ export default function ConfiguracionPage() {
             />
           </Field>
 
+          <Field label="Tipo de estructura">
+            <select
+              className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5"
+              value={config.tipoEstructura ?? "IA"}
+              onChange={(e) =>
+                update({ tipoEstructura: e.target.value as "IA" | "ES" })
+              }
+            >
+              <option value="IA">IA — Instalacion acuatica (piscina)</option>
+              <option value="ES">ES — Estructura similar (spa / jacuzzi)</option>
+            </select>
+          </Field>
+
+          <Field
+            label="Categoria"
+            hint="Indexa el motor de rangos junto con IA/ES. Los valores numericos siguen pendientes de confirmacion visual del Anexo I."
+          >
+            <select
+              className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5"
+              value={config.categoria ?? ""}
+              onChange={(e) =>
+                update({
+                  categoria: (e.target.value || null) as
+                    | "especial"
+                    | "primera"
+                    | "segunda"
+                    | "tercera"
+                    | null,
+                })
+              }
+            >
+              <option value="">Sin definir (pendiente)</option>
+              <option value="especial">Especial</option>
+              <option value="primera">1°</option>
+              <option value="segunda">2°</option>
+              <option value="tercera">3°</option>
+            </select>
+          </Field>
+
+          <Field label="Zona humeda (conteo compartido de banistas)">
+            <TextInput
+              value={config.zonaHumedaNombre ?? ""}
+              onChange={(e) => update({ zonaHumedaNombre: e.target.value })}
+            />
+          </Field>
+
           <p className="text-sm font-medium">Uso</p>
           <ToggleRow label="Colectiva" checked={config.usoColectiva} onChange={(v) => update({ usoColectiva: v })} />
           <ToggleRow label="Público" checked={config.usoPublico} onChange={(v) => update({ usoPublico: v })} />
@@ -216,14 +336,24 @@ export default function ConfiguracionPage() {
 
           <p className="text-sm font-medium">Presentación</p>
           <ToggleRow
-            label="Descubierta"
+            label="Descubierta (al aire libre)"
             checked={config.presentacionDescubierta}
-            onChange={(v) => update({ presentacionDescubierta: v })}
+            onChange={(v) =>
+              update({
+                presentacionDescubierta: v,
+                presentacionCubierta: v ? false : config.presentacionCubierta,
+              })
+            }
           />
           <ToggleRow
-            label="Cubierta"
+            label="Cubierta (muestra humedad relativa en el registro)"
             checked={config.presentacionCubierta}
-            onChange={(v) => update({ presentacionCubierta: v })}
+            onChange={(v) =>
+              update({
+                presentacionCubierta: v,
+                presentacionDescubierta: v ? false : config.presentacionDescubierta,
+              })
+            }
           />
 
           <div className="grid grid-cols-2 gap-3">

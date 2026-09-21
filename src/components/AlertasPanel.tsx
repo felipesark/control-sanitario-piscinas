@@ -10,35 +10,56 @@ interface AlertasPanelProps {
 export function AlertasPanel({ alertas, compact }: AlertasPanelProps) {
   if (alertas.length === 0) {
     return (
-      <div className={`rounded-xl bg-emerald-50 px-3 py-2 ${compact ? "text-xs" : "text-sm"} text-emerald-800`}>
+      <div
+        className={`rounded-xl bg-emerald-50 px-3 py-2 ${compact ? "text-xs" : "text-sm"} text-emerald-800`}
+      >
         Todos los parametros dentro del rango legal
       </div>
     );
   }
 
   const criticos = alertas.filter((a) => a.nivel === "critico").length;
+  const infos = alertas.filter((a) => a.nivel === "info").length;
+  const advertencias = alertas.filter((a) => a.nivel === "advertencia").length;
+
+  const bannerClass =
+    criticos > 0
+      ? "bg-red-50 text-red-800"
+      : advertencias > 0
+        ? "bg-amber-50 text-amber-800"
+        : "bg-sky-50 text-sky-900";
+
+  const bannerText =
+    criticos > 0
+      ? `${criticos} alerta(s) critica(s) - accion inmediata requerida`
+      : advertencias > 0
+        ? `${advertencias} advertencia(s) sanitarias`
+        : infos > 0
+          ? "Motor de rangos en modo informativo (sin alarmas numericas activas)"
+          : `${alertas.length} aviso(s)`;
 
   return (
     <div className="space-y-2">
-      <div className={`rounded-xl px-3 py-2 ${criticos > 0 ? "bg-red-50 text-red-800" : "bg-amber-50 text-amber-800"} ${compact ? "text-xs" : "text-sm"}`}>
-        {criticos > 0
-          ? `${criticos} alerta(s) critica(s) - accion inmediata requerida`
-          : `${alertas.length} advertencia(s) sanitarias`}
+      <div className={`rounded-xl px-3 py-2 ${bannerClass} ${compact ? "text-xs" : "text-sm"}`}>
+        {bannerText}
       </div>
-      {!compact && alertas.map((a) => (
-        <div
-          key={a.id}
-          className={`rounded-xl border px-3 py-2 text-sm ${
-            a.nivel === "critico"
-              ? "border-red-200 bg-red-50 text-red-900"
-              : "border-amber-200 bg-amber-50 text-amber-900"
-          }`}
-        >
-          <p className="font-semibold">{a.campo}</p>
-          <p className="mt-0.5">{a.mensaje}</p>
-          <p className="mt-1 text-xs opacity-70">{a.norma}</p>
-        </div>
-      ))}
+      {!compact &&
+        alertas.map((a) => (
+          <div
+            key={a.id}
+            className={`rounded-xl border px-3 py-2 text-sm ${
+              a.nivel === "critico"
+                ? "border-red-200 bg-red-50 text-red-900"
+                : a.nivel === "advertencia"
+                  ? "border-amber-200 bg-amber-50 text-amber-900"
+                  : "border-sky-200 bg-sky-50 text-sky-900"
+            }`}
+          >
+            <p className="font-semibold">{a.campo}</p>
+            <p className="mt-0.5">{a.mensaje}</p>
+            <p className="mt-1 text-xs opacity-70">{a.norma}</p>
+          </div>
+        ))}
     </div>
   );
 }
