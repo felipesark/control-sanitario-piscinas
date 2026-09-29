@@ -12,7 +12,6 @@ import { getSampleAppData } from "./sample-data";
 import {
   aplicarConfigPlana,
   crearEstructuraBaseDesdeConfig,
-  getInstalacionActiva,
   refreshConfiguracion,
 } from "./instalaciones";
 import { catalogoVacioProduccion } from "./rangos/motor";
@@ -99,12 +98,22 @@ function notifyAppDataChanged(): void {
 function readData(): AppData {
   if (typeof window === "undefined") return defaultAppData();
   const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return defaultAppData();
+  if (!raw) {
+    const initial = defaultAppData();
+    // Keep the same installation/zone IDs when polling or focusing the form.
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+    return initial;
+  }
+  let data: AppData;
   try {
-    return migrate(JSON.parse(raw) as Partial<AppData>);
+    data = migrate(JSON.parse(raw) as Partial<AppData>);
   } catch {
     return defaultAppData();
   }
+  // Persist generated migration IDs once, without triggering another refresh.
+  const normalized = JSON.stringify(data);
+  if (normalized !== raw) localStorage.setItem(STORAGE_KEY, normalized);
+  return data;
 }
 
 function writeData(data: AppData): void {

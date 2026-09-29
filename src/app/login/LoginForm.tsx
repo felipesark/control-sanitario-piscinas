@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { AuthShell } from "@/components/AppShell";
 import { formatAuthError } from "@/lib/auth-errors";
@@ -15,7 +15,6 @@ const submitClass =
   "mt-2 w-full rounded-full border border-white/35 bg-white/15 px-5 py-3.5 text-base font-bold text-white backdrop-blur-md transition hover:border-[#48b4e4]/70 hover:bg-white/25 hover:-translate-y-px disabled:opacity-65";
 
 export default function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/";
   const [email, setEmail] = useState("");
@@ -40,17 +39,34 @@ export default function LoginForm() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError("");
-    const supabase = createClient();
-    const { error: err } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (err) {
-      setError(formatAuthError(err.message));
-      return;
+    try {
+      const supabase = createClient();
+      const { error: err } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (err) throw err;
+
+      const destination = new URL(redirect, window.location.origin);
+      const safeDestination =
+        destination.origin === window.location.origin &&
+        !["/login", "/signup"].includes(destination.pathname)
+          ? destination.pathname + destination.search + destination.hash
+          : "/";
+
+      // A fresh request reads the session cookies without reusing a cached login redirect.
+      window.location.replace(safeDestination);
+    } catch (err) {
+      setError(
+        formatAuthError(
+          err instanceof Error ? err.message : "No se pudo iniciar sesión. Intenta nuevamente.",
+        ),
+      );
+      setLoading(false);
     }
-    router.push(redirect);
-    router.refresh();
   };
 
   return (
@@ -79,7 +95,7 @@ export default function LoginForm() {
             required
           />
         </label>
-        {error ? <p className="mb-4 text-sm text-[#ffd0d0]">{error}</p> : null}
+        {error ? <p role="alert" className="mb-4 text-sm text-[#ffd0d0]">{error}</p> : null}
         <button type="submit" className={submitClass} disabled={loading}>
           {loading ? "Entrando..." : "Entrar"}
         </button>
