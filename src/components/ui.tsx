@@ -11,12 +11,16 @@ export function SectionCard({ title, description, children }: SectionCardProps) 
   );
 }
 
-interface FieldProps { label: string; hint?: string; children: React.ReactNode; }
-export function Field({ label, hint, children }: FieldProps) {
+interface FieldProps { label: string; hint?: string; invalid?: boolean; children: React.ReactNode; }
+export function Field({ label, hint, invalid, children }: FieldProps) {
   return (
-    <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-[var(--foreground)]">{label}</span>
+    <label
+      data-invalid={invalid || undefined}
+      className={`block ${invalid ? "[&_input]:border-red-500 [&_input]:ring-2 [&_input]:ring-red-500/20 [&_select]:border-red-500 [&_select]:ring-2 [&_select]:ring-red-500/20 [&_textarea]:border-red-500 [&_textarea]:ring-2 [&_textarea]:ring-red-500/20" : ""}`}
+    >
+      <span className={`mb-1.5 block text-sm font-medium ${invalid ? "text-red-600" : "text-[var(--foreground)]"}`}>{label}</span>
       {children}
+      {invalid ? <span className="mt-1 block text-xs font-medium text-red-600">Falta completar este campo</span> : null}
       {hint ? <span className="mt-1 block text-xs text-[var(--muted)]">{hint}</span> : null}
     </label>
   );
@@ -44,12 +48,25 @@ export function SelectInput(props: React.SelectHTMLAttributes<HTMLSelectElement>
   );
 }
 
+const BADGE_COLORS: Record<string, string> = {
+  Diaria: "bg-blue-600 text-white",
+  Semanal: "bg-orange-500 text-white",
+  Mensual: "bg-violet-600 text-white",
+  Trimestral: "bg-teal-600 text-white",
+  Anual: "bg-rose-600 text-white",
+  Eventual: "bg-slate-500 text-white",
+};
+
+export function FrecuenciaBadge({ label }: { label: string }) {
+  return <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${BADGE_COLORS[label] ?? "bg-[var(--foam)] text-[var(--deep)]"}`}>{label}</span>;
+}
+
 export function ToggleRow({ label, checked, onChange, badge }: { label: string; checked: boolean; onChange: (value: boolean) => void; badge?: string; }) {
   return (
     <button type="button" onClick={() => onChange(!checked)} className={`flex w-full items-center justify-between rounded-xl border px-3 py-3 text-left transition ${checked ? "border-[var(--accent)] bg-[var(--accent)]/10" : "border-[var(--border)] bg-[var(--surface)]"}`}>
       <span className="pr-3 text-sm font-medium text-[var(--foreground)]">{label}</span>
       <span className="flex items-center gap-2">
-        {badge ? <span className="rounded-full bg-[var(--foam)] px-2 py-0.5 text-[10px] font-semibold uppercase text-[var(--deep)]">{badge}</span> : null}
+        {badge ? <FrecuenciaBadge label={badge} /> : null}
         <span className={`flex h-6 w-11 items-center rounded-full p-0.5 transition ${checked ? "bg-[var(--accent)]" : "bg-[var(--border)]"}`}>
           <span className={`h-5 w-5 rounded-full bg-[var(--surface-elevated)] shadow transition ${checked ? "translate-x-5" : "translate-x-0"}`} />
         </span>

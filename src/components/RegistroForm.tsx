@@ -30,6 +30,7 @@ import {
   parametrosPeriodicosVisibles,
   siguienteFaseDisponible,
   validarFase,
+  type ErrorValidacion,
   type MotivoAjuste,
 } from "@/lib/registro-rules";
 import { AlertasPanel } from "@/components/AlertasPanel";
@@ -81,23 +82,25 @@ const AJUSTE_FIELDS: {
 function MedicionesMomento({
   registro,
   slot,
+  invalidos,
   onChange,
 }: {
   registro: RegistroDiario;
   slot: MomentoDia;
+  invalidos: Set<string>;
   onChange: (campo: "potencialOxidacion" | "ph" | "cloroLibre" | "cloroCombinado", value: number | null) => void;
 }) {
   return (
     <div className="space-y-3">
       {(
         [
-          ["potencialOxidacion", "ORP / potencial oxidacion (mV)"],
-          ["ph", "pH"],
-          ["cloroLibre", "Cloro residual libre (mg/L)"],
-          ["cloroCombinado", "Cloro combinado (mg/L)"],
+          ["potencialOxidacion", "orp", "ORP / potencial oxidacion (mV)"],
+          ["ph", "ph", "pH"],
+          ["cloroLibre", "cloroLibre", "Cloro residual libre (mg/L)"],
+          ["cloroCombinado", "cloroCombinado", "Cloro combinado (mg/L)"],
         ] as const
-      ).map(([campo, label]) => (
-        <Field key={campo} label={label}>
+      ).map(([campo, errorId, label]) => (
+        <Field key={campo} label={label} invalid={invalidos.has(`${errorId}-${slot}`)}>
           <NumberInput
             value={registro.calidadQuimica[campo][slot] ?? ""}
             onChange={(e) => onChange(campo, parseNum(e.target.value))}
@@ -113,12 +116,14 @@ function BloqueAjustes({
   tipo,
   categoria,
   catalogo,
+  invalidos,
   update,
 }: {
   registro: RegistroDiario;
   tipo: Instalacion["tipoEstructura"];
   categoria: Instalacion["categoria"];
   catalogo: import("@/lib/rangos/types").CatalogoRangos;
+  invalidos: Set<string>;
   update: (partial: Partial<RegistroDiario>) => void;
 }) {
   const motivos = motivosAjustePorLectura(registro, tipo, categoria, catalogo);
@@ -145,7 +150,11 @@ function BloqueAjustes({
         AJUSTE_FIELDS.filter(
           (f) => motivos.includes(f.motivo) || registro.ajustes.huboDosificacion,
         ).map((f) => (
-          <Field key={f.motivo} label={`${f.label} (cantidad)`}>
+          <Field
+            key={f.motivo}
+            label={`${f.label} (cantidad)`}
+            invalid={invalidos.has(`ajuste-${f.motivo}`) || invalidos.has("ajuste-manual")}
+          >
             <NumberInput
               value={(registro.ajustes[f.key] as number | null) ?? ""}
               onChange={(e) =>
@@ -165,9 +174,11 @@ function BloqueAjustes({
 
 function BloqueFecal({
   registro,
+  invalidos,
   update,
 }: {
   registro: RegistroDiario;
+  invalidos: Set<string>;
   update: (partial: Partial<RegistroDiario>) => void;
 }) {
   return (
@@ -194,7 +205,7 @@ function BloqueFecal({
       />
       {registro.ajustes.accidenteContaminacion ? (
         <>
-          <Field label="Cantidad de cloro dosificado">
+          <Field label="Cantidad de cloro dosificado" invalid={invalidos.has("fecal-cloro")}>
             <NumberInput
               value={registro.ajustes.cloroResidualDosificado ?? ""}
               onChange={(e) =>
@@ -207,7 +218,7 @@ function BloqueFecal({
               }
             />
           </Field>
-          <Field label="Tiempo de contacto (min)">
+          <Field label="Tiempo de contacto (min)" invalid={invalidos.has("fecal-contacto")}>
             <NumberInput
               value={registro.ajustes.tiempoContactoMinimo ?? ""}
               onChange={(e) =>
@@ -220,7 +231,10 @@ function BloqueFecal({
               }
             />
           </Field>
-          <Field label="Tiempo de restablecimiento (min)">
+          <Field
+            label="Tiempo de restablecimiento (min)"
+            invalid={invalidos.has("fecal-restablecimiento")}
+          >
             <NumberInput
               value={registro.ajustes.tiempoRestablecimientoMin ?? ""}
               onChange={(e) =>
@@ -233,7 +247,10 @@ function BloqueFecal({
               }
             />
           </Field>
-          <Field label="Estanque apto / no apto tras el protocolo">
+          <Field
+            label="Estanque apto / no apto tras el protocolo"
+            invalid={invalidos.has("fecal-apto")}
+          >
             <SelectInput
               value={registro.ajustes.aptitudPostAccidente ?? ""}
               onChange={(e) =>
@@ -270,7 +287,7 @@ export function RegistroForm({
   const [fase, setFase] = useState<FaseOperacion>("apertura");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [errores, setErrores] = useState<string[]>([]);
+  const [errores, setErrores] = useState<ErrorValidacion[]>([]);
   const [motivoCorreccion, setMotivoCorreccion] = useState("");
   const [mostrarCorreccion, setMostrarCorreccion] = useState(false);
 
@@ -317,11 +334,25 @@ export function RegistroForm({
   const slotActual =
     fase === "cierre" ? null : (FASE_A_SLOT[fase as "apertura" | "mediodia" | "tarde"] as MomentoDia);
 
+  const invalidos = new Set(errores.map((e) => e.id));
+
+  const validar = (r: RegistroDiario): ErrorValidacion[] => {
+    const issues = validarFase(r, fase, historial, tipo, categoria, catalogoRangos);
+    if (fase === "cierre" && !r.firmaOperador) {
+      issues.push({ id: "firma", mensaje: "La firma del operador es obligatoria para cerrar el dia." });
+    }
+    return issues;
+  };
+
   const update = (partial: Partial<RegistroDiario>) => {
     if (cerrado) return;
-    setRegistro((prev) => (prev ? { ...prev, ...partial } : prev));
+    const next = { ...registro, ...partial };
+    setRegistro(next);
     setSaved(false);
-    setErrores([]);
+    // Tras un intento de guardado, solo se quitan las marcas de los campos ya completados.
+    if (errores.length) {
+      setErrores(validar(next).filter((e) => invalidos.has(e.id)));
+    }
   };
 
   const setMedicion = (
@@ -370,13 +401,15 @@ export function RegistroForm({
       };
     }
 
-    const issues = validarFase(next, fase, historial, tipo, categoria, catalogoRangos);
-    if (fase === "cierre" && !next.firmaOperador) {
-      issues.push({ id: "firma", mensaje: "La firma del operador es obligatoria para cerrar el dia." });
-    }
+    const issues = validar(next);
     if (issues.length) {
-      setErrores(issues.map((e) => e.mensaje));
+      setErrores(issues);
       setRegistro(next);
+      requestAnimationFrame(() => {
+        document
+          .querySelector("[data-invalid]")
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
       return;
     }
 
@@ -500,7 +533,11 @@ export function RegistroForm({
               key={f}
               type="button"
               disabled={!unlocked}
-              onClick={() => unlocked && setFase(f)}
+              onClick={() => {
+                if (!unlocked) return;
+                setFase(f);
+                setErrores([]);
+              }}
               className={`rounded-2xl border px-3 py-3 text-left transition ${
                 active
                   ? "border-[var(--deep)] bg-[var(--deep)] text-white"
@@ -529,10 +566,14 @@ export function RegistroForm({
               title="Apertura del estanque"
               description="Antes de que entren banistas. Deja el dia en progreso."
             >
-              <Field label="Hora de apertura" hint="Se asigna al abrir el registro">
+              <Field
+                label="Hora de apertura"
+                hint="Se asigna al abrir el registro"
+                invalid={invalidos.has("horaInicio")}
+              >
                 <TextInput type="time" value={registro.condiciones.horaInicio} readOnly />
               </Field>
-              <Field label="Piscinero / operador responsable">
+              <Field label="Piscinero / operador responsable" invalid={invalidos.has("responsable")}>
                 <SelectInput
                   value={registro.operadorId}
                   onChange={(e) => update({ operadorId: e.target.value })}
@@ -545,7 +586,7 @@ export function RegistroForm({
                   ))}
                 </SelectInput>
               </Field>
-              <Field label="Salvavidas (si aplica)">
+              <Field label="Salvavidas (si aplica)" invalid={invalidos.has("responsable")}>
                 <SelectInput
                   value={registro.salvavidasId}
                   onChange={(e) => update({ salvavidasId: e.target.value })}
@@ -597,7 +638,7 @@ export function RegistroForm({
                   ["transparencia", "Transparencia"],
                 ] as const
               ).map(([key, label]) => (
-                <Field key={key} label={label}>
+                <Field key={key} label={label} invalid={invalidos.has(`fisica-${key}`)}>
                   <AceptableSelect
                     value={registro.calidadFisica[key]}
                     onChange={(value) =>
@@ -610,7 +651,7 @@ export function RegistroForm({
 
             <SectionCard title="Dispositivos de seguridad" description="Revision completa antes de abrir.">
               {DISPOSITIVOS_SEGURIDAD.map((item) => (
-                <Field key={item.id} label={item.label}>
+                <Field key={item.id} label={item.label} invalid={invalidos.has(`seg-${item.id}`)}>
                   <AceptableSelect
                     value={registro.dispositivosSeguridad[item.id] ?? null}
                     onChange={(value) =>
@@ -631,6 +672,7 @@ export function RegistroForm({
                 <MedicionesMomento
                   registro={registro}
                   slot={slotActual}
+                  invalidos={invalidos}
                   onChange={(campo, value) => setMedicion(campo, slotActual, value)}
                 />
               ) : null}
@@ -642,7 +684,12 @@ export function RegistroForm({
                 description="Segun la ultima vez registrada, no por calendario fijo."
               >
                 {paramsVisibles.map((campo) => (
-                  <Field key={campo.id} label={campo.label} hint={FRECUENCIA_LABEL[campo.frecuencia]}>
+                  <Field
+                    key={campo.id}
+                    label={campo.label}
+                    hint={FRECUENCIA_LABEL[campo.frecuencia]}
+                    invalid={invalidos.has(`param-${campo.id}`)}
+                  >
                     <NumberInput
                       value={
                         (registro.calidadQuimica[
@@ -668,6 +715,7 @@ export function RegistroForm({
               tipo={tipo}
               categoria={categoria}
               catalogo={catalogoRangos}
+              invalidos={invalidos}
               update={update}
             />
           </>
@@ -696,6 +744,7 @@ export function RegistroForm({
               <MedicionesMomento
                 registro={registro}
                 slot={slotActual}
+                invalidos={invalidos}
                 onChange={(campo, value) => setMedicion(campo, slotActual, value)}
               />
             </SectionCard>
@@ -705,16 +754,17 @@ export function RegistroForm({
               tipo={tipo}
               categoria={categoria}
               catalogo={catalogoRangos}
+              invalidos={invalidos}
               update={update}
             />
-            <BloqueFecal registro={registro} update={update} />
+            <BloqueFecal registro={registro} invalidos={invalidos} update={update} />
           </>
         )}
 
         {fase === "cierre" && (
           <>
             <SectionCard title="Cierre del dia" description="Ultimo momento: firmar y bloquear el registro.">
-              <Field label="Hora final">
+              <Field label="Hora final" invalid={invalidos.has("horaFinal")}>
                 <TextInput
                   type="time"
                   value={registro.condiciones.horaFinal}
@@ -725,7 +775,7 @@ export function RegistroForm({
                   }
                 />
               </Field>
-              <Field label="Evaluacion final del estanque">
+              <Field label="Evaluacion final del estanque" invalid={invalidos.has("evaluacion")}>
                 <SelectInput
                   value={registro.evaluacionEstanque ?? ""}
                   onChange={(e) =>
@@ -815,12 +865,21 @@ export function RegistroForm({
               tipo={tipo}
               categoria={categoria}
               catalogo={catalogoRangos}
+              invalidos={invalidos}
               update={update}
             />
-            <BloqueFecal registro={registro} update={update} />
+            <BloqueFecal registro={registro} invalidos={invalidos} update={update} />
 
             <SectionCard title="Firma del operador" description="Al firmar y completar el cierre, el dia queda bloqueado.">
-              <SignaturePad value={registro.firmaOperador} onChange={handleFirma} />
+              <div
+                data-invalid={invalidos.has("firma") || undefined}
+                className={invalidos.has("firma") ? "rounded-xl ring-2 ring-red-500" : undefined}
+              >
+                <SignaturePad value={registro.firmaOperador} onChange={handleFirma} />
+              </div>
+              {invalidos.has("firma") ? (
+                <p className="text-xs font-medium text-red-600">Falta la firma del operador</p>
+              ) : null}
             </SectionCard>
           </>
         )}
@@ -830,9 +889,9 @@ export function RegistroForm({
         {errores.length > 0 ? (
           <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
             <p className="font-semibold">Complete este momento antes de continuar:</p>
-            <ul className="mt-1 list-disc pl-5">
-              {errores.map((msg) => (
-                <li key={msg}>{msg}</li>
+            <ul className="mt-1 max-h-32 list-disc overflow-y-auto pl-5">
+              {errores.map((e) => (
+                <li key={e.id + e.mensaje}>{e.mensaje}</li>
               ))}
             </ul>
           </div>
